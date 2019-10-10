@@ -280,7 +280,6 @@ void Matrix::insertBlock(Block newBlock, int initCol) {
                     goto nextloop;
                 }
             }
-            // check if the line can be deleted
         }
         curRow += 1;
         // reach bottom boundary
@@ -309,6 +308,72 @@ void Matrix::insertBlock(Block newBlock, int initCol) {
             }
         }
     }
+    
+    // check if the line can be deleted
+    int FirstRowDeleted = 0;
+    int total_no = 0;
+    for(int i = 0; i < newBlock.row; i++) {
+        int count = 0;
+        // one-index
+        for(int j = 1; j < col; j++) {
+            if(array[curRow-i][j] == 1) {
+                count++;
+            }
+        }
+        if(count==col-1) {
+            // set row that need to be deleted to -1
+            for(int j = 1; j < col; j++) {
+                array[curRow-i][j] = -1;
+            }
+            if(FirstRowDeleted==0) FirstRowDeleted = curRow-i;
+            total_no += 1;
+        }
+    }
+    
+    if(total_no!=0) {
+        for(int i = FirstRowDeleted; i >= 1; i--) {
+            bool isFounded = false;
+            // find row that is -1
+            while(array[i][1]!=-1) continue;
+            for(int j = i - 1; j >= 1 && !isFounded; j--) {
+                // find row that is 0 or 1
+                if(array[j][1]==-1) continue;
+                for(int k = 1; k < col; k++) {
+                    array[i][k] = array[j][k];
+                    array[j][k] = -1;
+                    isFounded = true;
+                }
+            }
+            
+        }
+        
+        // set -1 to 0
+        for(int i = total_no; i >= 1; i--) {
+            for(int j = 1; j < col; j++) {
+                array[i][j] = 0;
+            }
+        }
+    }
+    
+    
+    
+    
+    
+    /*
+    if(rowDeleted!=0) {
+        curRow -= rowDeleted;
+        for(int i = curRow; i >= 1; i--) {
+            for(int j = 1; j < col; j++) {
+                array[i][j] = array[i-1][j];
+            }
+        }
+        for(int i = rowDeleted; i >= 1; i--) {
+            for(int j = 1; j < col; j++) {
+                array[i][j] = 0;
+            }
+        }
+    }
+     */
 }
 
 
