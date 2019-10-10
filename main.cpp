@@ -117,6 +117,7 @@ int main() {
             }
             OutputFile<<endl;
         }
+        OutputFile.close();
     }
     else {
         cout<<"Cannot open Output"<<endl;
