@@ -254,7 +254,7 @@ void Matrix::printOutput() {
 
 // insert block
 void Matrix::insertBlock(Block newBlock, int initCol) {
-    int curRow = 4;
+    int curRow = newBlock.row;
     int blockRow = 3;
     bool isBottom = false;
     bool doesNotFit = false;
@@ -269,7 +269,7 @@ void Matrix::insertBlock(Block newBlock, int initCol) {
             }
         }
         
-        // drop from top
+        // drop from row 1
         for(int i = 0; i < newBlock.row; i++) {
             for(int j = 0; j < newBlock.col; j++) {
                 newArray[curRow-i][initCol+j] = array[curRow-i][initCol+j] + newBlock.BlockMatrix[blockRow-i][j];
@@ -280,7 +280,6 @@ void Matrix::insertBlock(Block newBlock, int initCol) {
                     goto nextloop;
                 }
             }
-            // check if the line can be deleted
         }
         curRow += 1;
         // reach bottom boundary
@@ -289,27 +288,128 @@ void Matrix::insertBlock(Block newBlock, int initCol) {
             curRow -= 1;
         }
         nextloop: ;
-        
-        // check the current row less or equal than 0
-        // check the current col is out of boundary
-        
     }
     
-    if(doesNotFit) {
-        for(int i = 0; i < newBlock.row; i++) {
-            for(int j = 0; j < newBlock.col; j++) {
-                array[curRow-i][initCol+j] = lastArray[curRow-i][initCol+j];
+    // check the current col is out of boundary
+    // test case is invalid
+    
+    // check the current row less or equal than 0
+    int lessRow = curRow;
+    int lessBlockRow = blockRow;
+    int leftBlockRow = newBlock.row;
+    bool isCompleted = false;
+    while(lessRow<=newBlock.row && doesNotFit) {
+        if(lessRow==0) {
+            // check the completion of insertion
+            if(leftBlockRow == 0) {
+                isCompleted = true;
+            }
+            else {
+                GameOver = true;
+            }
+            break;
+        }
+        // drop from outside
+        bool hasFailed = false;
+        for(int j = 0; j < newBlock.col; j++) {
+            newArray[lessRow][initCol+j] = array[lessRow][initCol+j] + newBlock.BlockMatrix[lessBlockRow][j];
+            // check the validity of new array
+            if(newArray[lessRow][initCol+j] >= 2) {
+                lessRow -= 1;
+                hasFailed = true;
+                break;
             }
         }
-    }
-    else {
-        for(int i = 0; i < newBlock.row; i++) {
+        if(!hasFailed) {
+            // update row
+            int lessCount = 0;
             for(int j = 0; j < newBlock.col; j++) {
-                array[curRow-i][initCol+j] = newArray[curRow-i][initCol+j];
+                array[lessRow][initCol+j] = newArray[lessRow][initCol+j];
+            }
+            // check the deletion
+            for(int j = 1; j < col; j++) {
+                if(array[lessRow][j]==1) lessCount++;
+            }
+            if(lessCount == col-1) {
+                for(int i = lessRow; i > 1; i--) {
+                    for(int j = 1; j < col; j++) {
+                        array[i][j] = array[i-1][j];
+                    }
+                }
+                for(int j = 1; j < col; j++) {
+                    array[1][j] = 0;
+                }
+            }
+            else {
+                lessRow -= 1;
+            }
+            
+            lessBlockRow -= 1;
+            leftBlockRow -= 1;
+        }
+    }
+    
+    if(!GameOver && !isCompleted) {
+        if(doesNotFit) {
+            for(int i = 0; i < newBlock.row; i++) {
+                for(int j = 0; j < newBlock.col; j++) {
+                    array[curRow-i][initCol+j] = lastArray[curRow-i][initCol+j];
+                }
+            }
+        }
+        else {
+            for(int i = 0; i < newBlock.row; i++) {
+                for(int j = 0; j < newBlock.col; j++) {
+                    array[curRow-i][initCol+j] = newArray[curRow-i][initCol+j];
+                }
+            }
+        }
+        
+        // delete block
+        // check if the line can be deleted
+        int FirstRowDeleted = 0;
+        int total_no = 0;
+        for(int i = 0; i < newBlock.row; i++) {
+            int count = 0;
+            // one-index
+            for(int j = 1; j < col; j++) {
+                if(array[curRow-i][j] == 1) {
+                    count++;
+                }
+            }
+            if(count==col-1) {
+                // set row that need to be deleted to -1
+                for(int j = 1; j < col; j++) {
+                    array[curRow-i][j] = -1;
+                }
+                if(FirstRowDeleted==0) FirstRowDeleted = curRow-i;
+                total_no += 1;
+            }
+        }
+        
+        if(total_no!=0) {
+            for(int i = FirstRowDeleted; i >= 1; i--) {
+                bool isFounded = false;
+                // find row that is -1
+                while(array[i][1]!=-1) continue;
+                for(int j = i - 1; j >= 1 && !isFounded; j--) {
+                    // find row that is 0 or 1
+                    if(array[j][1]==-1) continue;
+                    for(int k = 1; k < col; k++) {
+                        array[i][k] = array[j][k];
+                        array[j][k] = -1;
+                        isFounded = true;
+                    }
+                }
+                
+            }
+            
+            // set -1 to 0
+            for(int i = total_no; i >= 1; i--) {
+                for(int j = 1; j < col; j++) {
+                    array[i][j] = 0;
+                }
             }
         }
     }
 }
-
-
-// delete block
