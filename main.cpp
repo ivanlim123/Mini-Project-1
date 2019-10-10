@@ -298,8 +298,28 @@ void Matrix::insertBlock(Block newBlock, int initCol) {
     int lessBlockRow = blockRow;
     int leftBlockRow = newBlock.row;
     bool isCompleted = false;
+    bool hasChecked = false;
+    
     while(lessRow<=newBlock.row && doesNotFit) {
-        if(lessRow==0) {
+        while(!hasChecked) {
+            // find the first row to place new element
+            for(int i = 0; i < newBlock.row; i++) {
+                for(int j = 0; j < newBlock.col; j++) {
+                    if(lessRow-i==0) {
+                        hasChecked = true;
+                        goto checkFinished;
+                    }
+                    if(array[lessRow-i][initCol+j] + newBlock.BlockMatrix[lessBlockRow-i][j] >= 2) {
+                        lessRow -= 1;
+                        goto checkFinished;
+                    }
+                }
+            }
+            hasChecked = true;
+            checkFinished: ;
+        }
+        
+        if(lessRow<=0) {
             // check the completion of insertion
             if(leftBlockRow == 0) {
                 isCompleted = true;
@@ -309,6 +329,7 @@ void Matrix::insertBlock(Block newBlock, int initCol) {
             }
             break;
         }
+        
         // drop from outside
         bool hasFailed = false;
         for(int j = 0; j < newBlock.col; j++) {
