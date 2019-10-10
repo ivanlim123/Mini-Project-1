@@ -8,6 +8,9 @@
 
 #include <iostream>
 #include <string>
+#include <fstream>
+
+#define MAX_INPUT_NUMBER 1010
 
 using namespace std;
 
@@ -20,24 +23,59 @@ public:
 };
 
 class Matrix {
-private:
-    int row, col;
-    int **array;
 public:
     Matrix(int Row = 0, int Col = 0);
     void printOutput();
     void insertBlock(Block newBlock, int initCol);
-    
+    int row, col;
+    int **array;
 };
-
 
 void initArray(int **array, int row, int col);
 void insertBlock(int **array, Block block, int initCol);
 bool GameOver = false;
 
 int main() {
+    ifstream InputFile;
+    ofstream OutputFile;
+    InputFile.open("Input.txt");
+    
+    string line;
+    string command[MAX_INPUT_NUMBER];
+    int index = 0;
+    
+    if(InputFile.is_open()) {
+        while(!InputFile.eof()) {
+            getline(InputFile, line);
+            command[index++] = line;
+        }
+        InputFile.close();
+    }
+    else {
+        cout<<"Cannot open Input"<<endl;
+    }
+    
     int row = 0, col = 0;
-    cin>>row>>col;
+    string first_line = command[0];
+    string first = "";
+    string second = "";
+    bool skip = false;
+    unsigned long len = first_line.length();
+    for(unsigned long i = 0; i < len; i++) {
+        char ch = first_line[i];
+        if(ch==' ') {
+            skip = true;
+            continue;
+        }
+        if(!skip) {
+            first.push_back(ch);
+        }
+        else {
+            second.push_back(ch);
+        }
+    }
+    row = stoi(first);
+    col = stoi(second);
     
     // 1-index array
     row += 1;
@@ -45,13 +83,44 @@ int main() {
     
     Matrix myMatrix(row, col);
     
-    string name = "";
-    int initCol = 0;
-    while(cin>>name && name!="End" && !GameOver) {
-        cin>>initCol;
+    for(int i = 1; i < index && !GameOver; i++) {
+        string name = "";
+        string column = "";
+        int initCol = 0;
+        
+        bool space = false;
+        string cmd = command[i];
+        unsigned long cmd_len = cmd.length();
+        for(unsigned long j = 0; j < cmd_len; j++) {
+            char ch = cmd[j];
+            if(ch==' ') {
+                space = true;
+                continue;
+            }
+            if(!space) {
+                name.push_back(ch);
+            }
+            else {
+                column.push_back(ch);
+            }
+        }
+        if(name=="End") break;
+        initCol = stoi(column);
         myMatrix.insertBlock(Block(name), initCol);
     }
-    myMatrix.printOutput();
+    
+    OutputFile.open("Output.txt");
+    if(OutputFile.is_open()) {
+        for(int i = 1; i < row; i++) {
+            for(int j = 1; j < col; j++) {
+                OutputFile<<myMatrix.array[i][j];
+            }
+            OutputFile<<endl;
+        }
+    }
+    else {
+        cout<<"Cannot open Output"<<endl;
+    }
     return 0;
 }
 
