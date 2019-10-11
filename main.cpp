@@ -389,14 +389,15 @@ void Matrix::insertBlock(Block newBlock, int initCol) {
             checkFinished: ;
         }
         
+        // check the completion of insertion
+        if(leftBlockRow == 0) {
+            isCompleted = true;
+            break;
+        }
+        
+        // out of boundary 
         if(lessRow<=0) {
-            // check the completion of insertion
-            if(leftBlockRow == 0) {
-                isCompleted = true;
-            }
-            else {
-                GameOver = true;
-            }
+            GameOver = true;
             break;
         }
         
