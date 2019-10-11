@@ -38,7 +38,7 @@ bool GameOver = false;
 int main() {
     ifstream InputFile;
     ofstream OutputFile;
-    InputFile.open("Input.txt");
+    InputFile.open("Tetris.data");
     
     string line;
     string command[MAX_INPUT_NUMBER];
@@ -109,7 +109,7 @@ int main() {
         myMatrix.insertBlock(Block(name), initCol);
     }
     
-    OutputFile.open("Output.txt");
+    OutputFile.open("Tetris.output");
     if(OutputFile.is_open()) {
         for(int i = 1; i < row; i++) {
             for(int j = 1; j < col; j++) {
