@@ -27,6 +27,7 @@ public:
     Matrix(int Row = 0, int Col = 0);
     void printOutput();
     void insertBlock(Block newBlock, int initCol);
+    void insertBlockFront(Block newBlock, int initCol);
     int row, col;
     int **array;
 };
@@ -106,10 +107,16 @@ int main() {
         }
         if(name=="End") break;
         initCol = stoi(column);
-        myMatrix.insertBlock(Block(name), initCol);
+        // check if row <= 4
+        if(row<=4) {
+            myMatrix.insertBlockFront(Block(name), initCol);
+        }
+        else {
+            myMatrix.insertBlock(Block(name), initCol);
+        }
     }
     
-    OutputFile.open("Tetris.output");
+    OutputFile.open("Tetris.final");
     if(OutputFile.is_open()) {
         for(int i = 1; i < row; i++) {
             for(int j = 1; j < col; j++) {
@@ -122,6 +129,26 @@ int main() {
     else {
         cout<<"Cannot open Output"<<endl;
     }
+    
+    ifstream Output1;
+    ifstream Output2;
+    Output1.open("Tetris.final");
+    Output2.open("Check.final");
+    string check1 = "";
+    string check2 = "";
+    int flag = 1;
+    while(!Output1.eof() && !Output2.eof()) {
+        getline(Output1, check1);
+        getline(Output2, check2);
+        if(check1!=check2) {
+            flag = 0;
+            break;
+        }
+    }
+    Output1.close();
+    Output2.close();
+    if(flag) cout<<"correct!!!"<<endl;
+    else cout<<"wrong!!!"<<endl;
     return 0;
 }
 
@@ -319,6 +346,104 @@ void Matrix::printOutput() {
             cout<<array[i][j];
         }
         cout<<endl;
+    }
+}
+
+// insert block to row <= 4
+void Matrix::insertBlockFront(Block newBlock, int initCol) {
+    int curRow = (newBlock.row <= row-1) ? newBlock.row : row-1;
+    int blockRow = 3;   // insert block matrix row-index
+    int leftBlockRow = newBlock.row;
+    int newArray[row][col];
+    bool hasFinished = false;
+    
+    bool isBottom = false;
+    bool Fit = false;
+    bool isGoingUp = false;
+    // find first bottom row to insert
+    while(!isBottom && !Fit) {
+        // fall from top
+        for(int i = 0; i <= curRow; i++) {
+            for(int j = 0; j < newBlock.col; j++) {
+                newArray[curRow-i][initCol+j] = array[curRow-i][initCol+j] + newBlock.BlockMatrix[blockRow-i][j];
+                // check the validity of new array
+                if(newArray[curRow-i][initCol+j] >= 2) {
+                    isGoingUp = true;
+                    curRow -= 1;
+                    goto done;
+                }
+            }
+        }
+        if(isGoingUp) {
+            Fit = true;
+            goto done;
+        }
+        curRow += 1;
+        // reach bottom boundary
+        if(curRow==row) {
+            isBottom = true;
+            curRow -= 1;
+            break;
+        }
+        done: ;
+        // out of boundary
+        if(curRow<=0) {
+            GameOver = true;
+            break;
+        }
+        
+    }
+    
+    while(!hasFinished && !GameOver) {
+        hasFinished = false;
+        bool hasFailed = false;
+        for(int j = 0; j < newBlock.col; j++) {
+            newArray[curRow][initCol+j] = array[curRow][initCol+j] + newBlock.BlockMatrix[blockRow][j];
+            // check the validity of new array
+            if(newArray[curRow][initCol+j] >= 2) {
+                curRow -= 1;
+                hasFailed = true;
+                break;
+            }
+        }
+        
+        if(!hasFailed) {
+            // update row
+            int Count = 0;
+            for(int j = 0; j < newBlock.col; j++) {
+                array[curRow][initCol+j] = newArray[curRow][initCol+j];
+            }
+            // check the deletion
+            for(int j = 1; j < col; j++) {
+                if(array[curRow][j]==1) Count++;
+            }
+            if(Count == col-1) {
+                for(int i = curRow; i > 1; i--) {
+                    for(int j = 1; j < col; j++) {
+                        array[i][j] = array[i-1][j];
+                    }
+                }
+                for(int j = 1; j < col; j++) {
+                    array[1][j] = 0;
+                }
+            }
+            else {
+                curRow -= 1;
+            }
+            blockRow -= 1;
+            leftBlockRow -= 1;
+        }
+        // insertion is completed
+        if(leftBlockRow<=0) {
+            hasFinished = true;
+            break;
+        }
+        
+        // out of boundary
+        if(curRow<=0) {
+            GameOver = true;
+            break;
+        }
     }
 }
 
