@@ -129,26 +129,6 @@ int main() {
     else {
         cout<<"Cannot open Output"<<endl;
     }
-    
-    ifstream Output1;
-    ifstream Output2;
-    Output1.open("Tetris.final");
-    Output2.open("Check.final");
-    string check1 = "";
-    string check2 = "";
-    int flag = 1;
-    while(!Output1.eof() && !Output2.eof()) {
-        getline(Output1, check1);
-        getline(Output2, check2);
-        if(check1!=check2) {
-            flag = 0;
-            break;
-        }
-    }
-    Output1.close();
-    Output2.close();
-    if(flag) cout<<"correct!!!"<<endl;
-    else cout<<"wrong!!!"<<endl;
     return 0;
 }
 
